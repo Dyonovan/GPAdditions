@@ -1,0 +1,9 @@
+name: GPAdditions
+main: com.mcbeyondreality.dyonovan.gpadditions.GPAdditions
+version: 1.0
+commands:
+   gpareload:
+      description: Reloads GPAdditions configs
+      usage: /<command>
+      permission: gpaddition.reload
+      permission-message: You don't have permission to run this command!
