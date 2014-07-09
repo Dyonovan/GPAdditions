@@ -18,11 +18,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class GPAdditions extends JavaPlugin implements Listener {
 
 	List<String> leftClick = new ArrayList<String>();
-
+	List<String> rightClick = new ArrayList<String>();
+	
 	@Override
 	public void onEnable() {
 		this.saveDefaultConfig();
 		leftClick = GPAdditions.this.getConfig().getStringList("LeftClick");
+		rightClick = GPAdditions.this.getConfig().getStringList("RightClick");
 		getServer().getPluginManager().registerEvents(this, this);
 	}
 
@@ -62,12 +64,33 @@ public final class GPAdditions extends JavaPlugin implements Listener {
 			}
 		} else if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 			
-			WorldConfig wc = GriefPrevention.instance.getWorldCfg(event.getPlayer().getWorld());
-			if (wc.getContainersRules().Allowed(event.getClickedBlock().getLocation(), event.getPlayer(), true).Denied()) {
-				event.setCancelled(true);
+			for (Object o : rightClick) {
+
+				String splitConfig[] = o.toString().split(":");
+
+				if (splitConfig[1].toString().equalsIgnoreCase("*")) {
+
+					if (event.getClickedBlock().getType().toString().equalsIgnoreCase(splitConfig[0])) {
+
+						WorldConfig wc = GriefPrevention.instance.getWorldCfg(event.getPlayer().getWorld());
+
+						if (wc.getContainersRules().Allowed(event.getClickedBlock().getLocation(), event.getPlayer(), true).Denied()) {
+							event.setCancelled(true);
+						}
+
+					} 
+				} else if (event.getClickedBlock().getState().getData().toString().equalsIgnoreCase((splitConfig[0] + "(" + splitConfig[1] + ")"))) {
+
+					WorldConfig wc = GriefPrevention.instance.getWorldCfg(event.getPlayer().getWorld());
+					if (wc.getContainersRules().Allowed(event.getClickedBlock().getLocation(), event.getPlayer(), true).Denied()) {
+						event.setCancelled(true);
+					}
+
+				}
 			}
+			
 		} else if (event.getAction() == Action.PHYSICAL) {
-			event.getPlayer().sendMessage("Pressure Plate Activated");
+			//event.getPlayer().sendMessage("Pressure Plate Activated");
 		}
 	}
 
@@ -77,6 +100,7 @@ public final class GPAdditions extends JavaPlugin implements Listener {
 		if (cmd.getName().equalsIgnoreCase("gpareload")) {
 			this.reloadConfig();
 			leftClick = GPAdditions.this.getConfig().getStringList("LeftClick");
+			rightClick = GPAdditions.this.getConfig().getStringList("RightClick");
 			sender.sendMessage("Config Reload...");
 			return true;
 		}
